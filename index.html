@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CareLens v0.4 Functional Demo</title>
+<style>
+:root{--bg:#f4f7fb;--panel:#fff;--text:#142033;--muted:#69788d;--nav:#11324e;--nav2:#174a70;--line:#e3e8ef;--danger:#b33d3d;--warn:#b86c00;--info:#2b6091;--ok:#317047;--shadow:0 8px 24px rgba(16,42,67,.07)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.app{display:grid;grid-template-columns:255px 1fr;min-height:100vh}.sidebar{background:linear-gradient(180deg,var(--nav),var(--nav2));color:white;padding:24px 18px;position:sticky;top:0;height:100vh}
+.logo{font-size:25px;font-weight:850}.tag{font-size:12px;color:#c8d5e2;line-height:1.5;margin:6px 0 24px}.badge{display:inline-block;font-size:10px;font-weight:850;letter-spacing:.05em;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.13);margin-bottom:12px}
+.navbtn{width:100%;text-align:left;background:transparent;border:0;color:#d9e4ed;padding:12px 14px;border-radius:10px;margin:4px 0;cursor:pointer}.navbtn.active,.navbtn:hover{background:rgba(255,255,255,.12);color:#fff}
+.sidefoot{position:absolute;bottom:18px;left:18px;right:18px;font-size:11px;color:#c4d0dc;line-height:1.5}
+.main{padding:28px 32px 50px}.top{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:22px}.top h1{margin:0;font-size:29px}.top p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:var(--nav2);color:#fff}.soft{background:#eaf0f5;color:var(--nav2)}.good{background:#e6f4e9;color:var(--ok)}.bad{background:#fbe9e9;color:var(--danger)}
+.page{display:none}.page.active{display:block}.hero,.panel,.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}.hero{padding:20px;margin-bottom:16px;background:linear-gradient(135deg,#fbfdff,#edf4f8)}.hero h2{margin:4px 0 6px}.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--nav2);font-weight:850}.note{font-size:12px;color:var(--muted);line-height:1.55}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}.card{padding:17px}.label{font-size:11px;text-transform:uppercase;color:var(--muted);font-weight:850;letter-spacing:.04em}.num{font-size:30px;font-weight:850;margin:5px 0}.sub{font-size:12px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.panel{padding:18px}.panel h3{margin:0 0 14px}.upload{border:2px dashed #bcc8d4;background:#fafcff;border-radius:14px;padding:28px;text-align:center}.upload p{max-width:650px;margin:8px auto 16px;color:var(--muted);line-height:1.55}
+.table{width:100%;border-collapse:collapse;font-size:13px}.table th{text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;padding:10px;border-bottom:1px solid var(--line)}.table td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.finding{display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:start;padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer}.dot{width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--info)}.dot.high{background:var(--danger)}.dot.medium{background:var(--warn)}.ft{font-weight:800;font-size:14px}.fm{font-size:12px;color:var(--muted);margin-top:4px}.pill{font-size:11px;border-radius:999px;padding:5px 8px;background:#eef2f6;color:#586578}.module{display:inline-block;padding:4px 7px;border-radius:7px;background:#edf3f7;color:var(--nav2);font-size:11px;font-weight:800}
+.drawer{position:fixed;top:0;right:-650px;width:620px;max-width:96vw;height:100vh;background:#fff;z-index:50;box-shadow:-12px 0 35px rgba(0,0,0,.2);padding:24px;overflow:auto;transition:.22s}.drawer.open{right:0}.overlay{display:none;position:fixed;inset:0;background:rgba(10,25,40,.38);z-index:40}.overlay.open{display:block}
+.evidence{background:#f6f9fc;border-left:4px solid var(--nav2);padding:12px 14px;border-radius:8px;font-size:13px;line-height:1.55}.drawer h4{margin:20px 0 8px;font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:.06em}.decision{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;padding-top:15px;border-top:1px solid var(--line)}
+select,input[type=text]{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px}.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.empty{text-align:center;color:var(--muted);padding:28px}.status-open{color:var(--danger);font-weight:800}.status-resolved{color:var(--ok);font-weight:800}
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.sidefoot{display:none}.cards{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}@media(max-width:600px){.cards{grid-template-columns:1fr}.main{padding:18px 13px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<div class="logo">CareLens</div><div class="tag">Find what your care records are telling you.</div><div class="badge">FUNCTIONAL SYNTHETIC DEMO</div>
+<button class="navbtn active" data-page="dashboard">◫ &nbsp; Dashboard</button>
+<button class="navbtn" data-page="upload">⇧ &nbsp; Analyse Records</button>
+<button class="navbtn" data-page="findings">◎ &nbsp; Findings Inbox</button>
+<button class="navbtn" data-page="actions">✓ &nbsp; ActionLens</button>
+<button class="navbtn" data-page="evidence">◇ &nbsp; EvidenceLens</button>
+<button class="navbtn" data-page="oversight">▦ &nbsp; Oversight</button>
+<button class="navbtn" data-page="tour">▶ &nbsp; Demo Guide</button>
+<div class="sidefoot">Synthetic records only.<br>CareLens surfaces evidence for human review.</div>
+</aside>
+<main class="main">
+<div class="top"><div><h1 id="pageTitle">Management Dashboard</h1><p id="datasetName">No dataset analysed yet</p></div><button class="btn primary" data-jump="upload">Analyse records</button></div>
+
+<section class="page active" id="dashboard">
+<div class="hero"><div class="kicker">Functional v0.4</div><h2>Upload synthetic records and generate findings</h2><div class="note">Unlike the earlier static demo, this version analyses the CSV loaded in your browser. No file is sent anywhere by this prototype.</div></div>
+<div class="cards">
+<div class="card"><div class="label">Records analysed</div><div class="num" id="mRecords">0</div><div class="sub">Loaded CSV rows</div></div>
+<div class="card"><div class="label">Review findings</div><div class="num" id="mReview">0</div><div class="sub">Recording/action concerns</div></div>
+<div class="card"><div class="label">Open actions</div><div class="num" id="mOpen">0</div><div class="sub">No later completion found</div></div>
+<div class="card"><div class="label">Positive evidence</div><div class="num" id="mPositive">0</div><div class="sub">Voice, inclusion & progress</div></div>
+</div>
+<div class="grid2"><div class="panel"><h3>Priority attention</h3><div id="priority"></div></div><div class="panel"><h3>What CareLens analysed</h3><div id="moduleSummary" class="note">Load the sample dataset or upload a CSV to begin.</div></div></div>
+
+<div class="panel" style="margin-top:18px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <h3 style="margin:0">Management assurance snapshot</h3>
+    <span class="pill">Generated from current analysis</span>
+  </div>
+  <div class="cards" style="margin-bottom:0">
+    <div class="card" style="box-shadow:none">
+      <div class="label">Young-person voice</div>
+      <div class="num" id="mVoice">0%</div>
+      <div class="sub">Records where CareLens found a wish, choice, feeling or preference</div>
+    </div>
+    <div class="card" style="box-shadow:none">
+      <div class="label">Action closure</div>
+      <div class="num" id="mClosure">0%</div>
+      <div class="sub">Detected actions with later completion evidence</div>
+    </div>
+    <div class="card" style="box-shadow:none">
+      <div class="label">EDI / inclusion evidence</div>
+      <div class="num" id="mEDI">0</div>
+      <div class="sub">Identity, faith, accessibility and culturally responsive examples</div>
+    </div>
+    <div class="card" style="box-shadow:none">
+      <div class="label">Recording quality</div>
+      <div class="num" id="mQuality">0</div>
+      <div class="sub">RecordLens review opportunities</div>
+    </div>
+  </div>
+  <div class="note" style="margin-top:10px">These are management indicators for the demo, not regulatory or Ofsted scores.</div>
+</div>
+</section>
+
+<section class="page" id="upload">
+<div class="upload"><div class="kicker">Local browser analysis</div><h2>Analyse synthetic CSV records</h2><p>Required columns: Record ID, Date, Time, Young Person, Record Type, Author, Record Text. This prototype intentionally supports CSV only so the analysis path stays transparent.</p>
+<input type="file" id="fileInput" accept=".csv"><div style="margin-top:14px"><button class="btn primary" id="loadSample">Load built-in demo dataset</button></div><div id="uploadStatus" class="note" style="margin-top:12px"></div></div>
+<div class="panel" style="margin-top:18px"><h3>Five analysis modules</h3><table class="table"><tr><th>RecordLens</th><td>Potentially judgemental wording, vague/general recording and missing perspective.</td></tr><tr><th>ActionLens</th><td>Commitments and later completion evidence.</td></tr><tr><th>VoiceLens</th><td>Young-person wishes, choices, feelings and preferences.</td></tr><tr><th>EvidenceLens</th><td>Inclusion, identity, accessibility, independence and positive practice.</td></tr><tr><th>ConnectionLens</th><td>Repeated themes and related events across records.</td></tr></table></div>
+</section>
+
+<section class="page" id="findings"><div class="filters"><select id="moduleFilter"><option value="all">All modules</option><option>RecordLens</option><option>ActionLens</option><option>VoiceLens</option><option>EvidenceLens</option><option>ConnectionLens</option></select><input id="search" type="text" placeholder="Search findings..."></div><div class="panel"><div id="findingsTable"></div></div></section>
+<section class="page" id="actions"><div class="panel"><h3>ActionLens</h3><div id="actionsTable"></div></div></section>
+<section class="page" id="evidence"><div class="panel"><h3>EvidenceLens & VoiceLens</h3><div id="evidenceList"></div></div></section>
+
+<section class="page" id="oversight">
+  <div class="hero">
+    <div class="kicker">Responsible Individual / Provider view</div>
+    <h2>Oversight without reading every log</h2>
+    <div class="note">This page combines the current functional analysis for Cedar Lodge with illustrative synthetic comparison homes. The provider-level layout is demonstrative; Cedar Lodge metrics come from the records analysed in this browser session.</div>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="label">Homes in demo</div><div class="num">3</div><div class="sub">Synthetic provider view</div></div>
+    <div class="card"><div class="label">Current-home reviews</div><div class="num" id="oReviews">0</div><div class="sub">Generated from current analysis</div></div>
+    <div class="card"><div class="label">Current-home open actions</div><div class="num" id="oOpen">0</div><div class="sub">Generated from current analysis</div></div>
+    <div class="card"><div class="label">Current-home positive evidence</div><div class="num" id="oPositive">0</div><div class="sub">Generated from current analysis</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>Home assurance overview</h3>
+      <table class="table">
+        <thead><tr><th>Home</th><th>Attention</th><th>Open actions</th><th>Positive evidence</th></tr></thead>
+        <tbody>
+          <tr><td><b>Cedar Lodge</b><div class="fm">Current functional analysis</div></td><td id="cedarAttention">—</td><td id="cedarOpen">—</td><td id="cedarPositive">—</td></tr>
+          <tr><td><b>Willow House</b><div class="fm">Illustrative comparison</div></td><td><span class="pill">Review</span></td><td>2</td><td>13</td></tr>
+          <tr><td><b>Oak View</b><div class="fm">Illustrative comparison</div></td><td><span class="pill">Stable</span></td><td>1</td><td>10</td></tr>
+        </tbody>
+      </table>
+      <div class="note" style="margin-top:10px">Only Cedar Lodge updates from the live browser analysis in this demo.</div>
+    </div>
+
+    <div class="panel">
+      <h3>What CareLens could answer</h3>
+      <div class="finding"><div class="dot high"></div><div><div class="ft">Where is management attention needed?</div><div class="fm">Prioritised exceptions rather than raw record volume.</div></div></div>
+      <div class="finding"><div class="dot medium"></div><div><div class="ft">Are agreed actions actually being closed?</div><div class="fm">Narrative commitments linked to later completion evidence.</div></div></div>
+      <div class="finding"><div class="dot"></div><div><div class="ft">Can we evidence voice, inclusion and progress?</div><div class="fm">Positive evidence surfaced from ordinary records.</div></div></div>
+      <div class="finding"><div class="dot"></div><div><div class="ft">Where are recording standards weakening?</div><div class="fm">Evidence gaps and wording concerns for human review.</div></div></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:18px">
+    <h3>Assurance indicators for Cedar Lodge</h3>
+    <table class="table">
+      <thead><tr><th>Indicator</th><th>Current result</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr><td>Young-person voice</td><td id="oVoice">0%</td><td>Proportion of analysed records with identified wishes, feelings, choices or preferences.</td></tr>
+        <tr><td>Action closure</td><td id="oClosure">0%</td><td>Detected narrative actions with later completion evidence.</td></tr>
+        <tr><td>EDI / inclusion evidence</td><td id="oEDI">0</td><td>EvidenceLens findings relevant to identity, faith, accessibility or inclusion.</td></tr>
+        <tr><td>Recording-quality reviews</td><td id="oQuality">0</td><td>RecordLens findings that may benefit from management review.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<section class="page" id="tour">
+  <div class="hero">
+    <div class="kicker">5-minute manager demo</div>
+    <h2>How to demonstrate CareLens</h2>
+    <div class="note">Show the value before explaining the technology.</div>
+  </div>
+  <div class="panel">
+    <div class="finding"><span class="pill">1</span><div><div class="ft">Analyse Records</div><div class="fm">Load the built-in synthetic dataset or upload the supplied CSV. The browser generates the findings.</div></div></div>
+    <div class="finding"><span class="pill">2</span><div><div class="ft">Dashboard</div><div class="fm">Ask: “What needs the manager's attention without reading every log?”</div></div></div>
+    <div class="finding"><span class="pill">3</span><div><div class="ft">Open a finding</div><div class="fm">Show the reason, evidence and exact linked source records.</div></div></div>
+    <div class="finding"><span class="pill">4</span><div><div class="ft">ActionLens</div><div class="fm">Show that CareLens can identify commitments and look for later completion.</div></div></div>
+    <div class="finding"><span class="pill">5</span><div><div class="ft">EvidenceLens & VoiceLens</div><div class="fm">Show positive evidence of inclusion, independence, identity, participation and young-person voice.</div></div></div>
+    <div class="finding"><span class="pill">6</span><div><div class="ft">Oversight</div><div class="fm">Show how a Responsible Individual or provider could move from one home to organisation-level assurance.</div></div></div>
+  </div>
+  <div class="panel" style="margin-top:18px">
+    <h3>Suggested opening line</h3>
+    <div class="evidence">“CareLens does not replace your recording system. It reviews the records your home already creates and helps you find what needs attention, what actions remain open, and what positive evidence may otherwise be missed.”</div>
+  </div>
+</section>
+
+</main></div>
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer"><button class="btn soft" id="close" style="float:right">Close</button><div class="module" id="dModule"></div><h2 id="dTitle"></h2><div class="fm" id="dMeta"></div><h4>Why surfaced</h4><div id="dWhy" class="note"></div><h4>Evidence</h4><div id="dEvidence" class="evidence"></div><h4>Related source records</h4><div id="dRecords"></div><div class="decision"><button class="btn good" onclick="decision('Accepted')">Accept</button><button class="btn bad" onclick="decision('Not relevant')">Not relevant</button><button class="btn soft" onclick="decision('Assigned')">Assign</button><button class="btn soft" onclick="decision('Resolved')">Resolve</button></div><div id="dDecision" class="note" style="margin-top:10px"></div></aside>
+
+<script>
+const SAMPLE_CSV = "Record ID,Date,Time,Young Person,Record Type,Author,Record Text\nD001,2026-12-01,08:00,Amir Hassan,Daily Log,KP,Amir asked staff if breakfast could be later on Friday because he would be attending mosque with his uncle. Staff agreed and added this to the morning plan.\nD002,2026-12-01,08:00,Sophie Bell,Daily Log,TM,Sophie was pathetic this morning and clearly couldn't be bothered. She stayed under the duvet and ignored staff.\nD003,2026-12-01,08:00,Luca Marin,Daily Log,RC,Luca attended college and helped another student understand a software task. His tutor praised him.\nD004,2026-12-02,08:00,Sophie Bell,Daily Log,KP,\"Sophie had a normal day. School, food, room, all fine.\"\nD005,2026-12-02,17:10,Amir Hassan,Health Record,RC,Amir reported itchy watery eyes after football. Staff supported him to rinse his face and rest indoors. Symptoms reduced.\nD006,2026-12-03,16:30,Amir Hassan,Health Record,RC,Amir said his eyes became itchy again during lunch break. They were mildly red and settled after washing his face.\nD007,2026-12-04,08:00,Luca Marin,Daily Log,TM,Luca asked if he could cook sarmale at the weekend because his mum used to make it at Christmas. Staff agreed to add the ingredients to the shopping list.\nD008,2026-12-04,08:00,Sophie Bell,Daily Log,KP,Sophie asked her tutor to sit beside her rather than directly opposite because eye contact made her uncomfortable when discussing difficult work. The tutor agreed.\nD009,2026-12-05,12:30,Amir Hassan,Family Contact,RC,\"Amir's uncle cancelled mosque and lunch because his car had broken down. Amir said, 'I got up early for nothing.'\"\nD010,2026-12-05,15:00,Amir Hassan,Incident,TM,\"Later Amir asked to meet friends without staff. Staff explained this was not agreed in his plan. Amir shouted and kicked a plastic plant pot. He later said, 'everything gets cancelled then I'm told no.' Manager to review whether his support plan should be updated.\"\nD011,2026-12-06,10:15,Amir Hassan,Key Work,TM,Amir said he wants five minutes alone after disappointing news before staff ask questions. Staff agreed this preference would be added to his support plan.\nD012,2026-12-08,10:00,Amir Hassan,Professional Contact,RC,\"Manager updated Amir's support plan with five minutes of space after upsetting news. Amir read it and said, 'that's better.'\"\nD013,2026-12-04,08:00,Sophie Bell,Daily Log,KP,Sophie asked for transport to an art workshop on Saturday. Staff said they needed to check rota cover and would tell her Friday.\nD014,2026-12-05,08:00,Sophie Bell,Daily Log,RC,Manager confirmed transport for Saturday's art workshop and Sophie was informed.\nD015,2026-12-04,08:00,Luca Marin,Daily Log,TM,\"Luca used his agreed independent time to go to the library, texted the home as planned and returned ten minutes early.\"\nD016,2026-12-07,08:00,Luca Marin,Daily Log,RC,Luca asked if he could wear a traditional Romanian embroidered shirt during a family video call. Staff supported his choice.\nD017,2026-12-07,17:45,Amir Hassan,Health Record,KP,After playing football near freshly cut grass Amir developed itchy watery eyes again. Staff supported him indoors and symptoms reduced.\nD018,2026-12-07,21:45,Amir Hassan,Night Log,RC,Amir requested his agreed antihistamine PRN because itching returned. It was administered according to MAR.\nD019,2026-12-08,08:30,Amir Hassan,Health Record,KP,Amir said the antihistamine stopped the itching within about fifteen minutes and his eyes were comfortable overnight.\nD020,2026-12-08,08:00,Luca Marin,Daily Log,RC,Luca wrote a Romanian Christmas message in a card for his grandmother.\n";
+let records=[], findings=[], currentPage='dashboard';
+const $=id=>document.getElementById(id);
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function csvParse(text){
+ const rows=[];let row=[],field='',q=false;
+ for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(c==='"'){if(q&&n==='"'){field+='"';i++}else q=!q}else if(c===','&&!q){row.push(field);field=''}else if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(field);if(row.some(x=>x!==''))rows.push(row);row=[];field=''}else field+=c}
+ row.push(field);if(row.some(x=>x!==''))rows.push(row);
+ const h=rows.shift().map(x=>x.trim());return rows.map(r=>Object.fromEntries(h.map((k,i)=>[k,(r[i]||'').trim()])));
+}
+function add(module,category,r,ids,severity,title,why,evidence,status='Review recommended',positive=false){
+ findings.push({id:'F'+String(findings.length+1).padStart(3,'0'),module,category,person:r['Young Person'],ids:[...new Set(ids)],severity,title,why,evidence,status,positive});
+}
+function analyse(rs){
+ records=rs;findings=[];
+ const lower=s=>(s||'').toLowerCase();
+ // RecordLens
+ rs.forEach(r=>{
+   const t=lower(r['Record Text']);
+   const judgement=['pathetic','lazy','manipulative','attention seeking',"clearly couldn\'t be bothered",'obviously wanted an argument','trying to wind'];
+   const j=judgement.filter(x=>t.includes(x));
+   if(j.length){
+     add('RecordLens','Judgemental wording',r,[r['Record ID']],'High','Potentially judgemental or motive-attributing wording','The entry may label the young person or attribute motive instead of recording only observable behaviour.',j.map(x=>'“'+x+'”').join('; '));
+     if(!/[“"'’]/.test(r['Record Text'])) add('RecordLens','Missing young-person voice',r,[r['Record ID']],'Low',"Young person's perspective is not evident","The entry interprets presentation but does not include the young person's own view.",r['Record Text'],'Opportunity');
+   }
+   const vague=['normal day','all fine','nothing to report','fine all','decent evening','food, room','school food room'];
+   if(vague.some(x=>t.includes(x)) && r['Record Text'].length<180) add('RecordLens','Vague recording',r,[r['Record ID']],'Medium','Record may be too general','The entry provides limited observable detail, interaction, context or outcome.',r['Record Text']);
+ });
+ // VoiceLens
+ rs.forEach(r=>{
+   const text=r['Record Text']; const t=lower(text);
+   const voiceSignal=/\b(asked|said|chose|preferred|wants|wanted|declined|requested|told staff|explained)\b/i.test(text);
+   if(voiceSignal){
+      const quotes=[...text.matchAll(/['“"]([^'”"]{3,120})['”"]/g)].map(m=>m[1]);
+      const ev=quotes.length?quotes.join(' | '):text.slice(0,220);
+      add('VoiceLens','Young-person voice',r,[r['Record ID']],'Info','Young-person voice or preference identified','The record contains a wish, choice, feeling, request, refusal or preference expressed by the young person.',ev,'Positive evidence',true);
+   }
+ });
+ // EvidenceLens
+ rs.forEach(r=>{
+   const t=lower(r['Record Text']);
+   const concepts=[];
+   if(/\bmosque|prayer|fasting\b/.test(t)) concepts.push(['Faith / religious practice','The record supports faith-related practice or routine.']);
+   if(/\bromanian|sarmale|traditional .*shirt|christmas message\b/.test(t)) concepts.push(['Cultural / family identity','The record contains culturally or family-linked identity evidence.']);
+   if(/\beye contact|sit beside|rather than directly opposite\b/.test(t)) concepts.push(['Accessibility / individualised support','The environment or communication approach was adjusted around an individual preference or barrier.']);
+   if(/\bindependent time|returned .*early|texted the home as planned\b/.test(t)) concepts.push(['Independence / trust','The record evidences safe independence and agreed community expectations.']);
+   if(/\bhelped another student|helped another young person|praised him|praised her\b/.test(t)) concepts.push(['Positive contribution / progress','The record evidences contribution, achievement or positive progress.']);
+   concepts.forEach(c=>add('EvidenceLens','Positive practice',r,[r['Record ID']],'Info',c[0],c[1],r['Record Text'],'Positive evidence',true));
+ });
+ // Action extraction
+ const actions=[];
+ rs.forEach(r=>{
+   const t=lower(r['Record Text']);
+   let concept=null;
+   if(/manager to .*support plan|support plan should be updated|preference would be added to .*support plan/.test(t)) concept='support plan update';
+   else if(/would tell her|would tell him|need.*check.*transport|transport.*confirm/.test(t)) concept='transport confirmation';
+   else if(/agreed to .*shopping list|agreed to buy|missing ingredient/.test(t)) concept='shopping follow-up';
+   if(concept) actions.push({source:r,concept});
+ });
+ actions.forEach(a=>{
+   const s=a.source, date=s.Date;
+   const later=rs.filter(r=>r['Young Person']===s['Young Person'] && r.Date>=date && r['Record ID']!==s['Record ID']);
+   const resolved=later.filter(r=>{
+     const t=lower(r['Record Text']);
+     if(a.concept==='support plan update') return /support plan.*updated|updated .*support plan|added .*support plan/.test(t);
+     if(a.concept==='transport confirmation') return /transport.*confirmed|confirmed transport|driver.*confirmed/.test(t);
+     if(a.concept==='shopping follow-up') return /bought .*ingredient|ingredients.*bought|shopping.*completed/.test(t);
+     return false;
+   });
+   add('ActionLens','Action lifecycle',s,[s['Record ID'],...resolved.map(x=>x['Record ID'])],resolved.length?'Info':'High',(resolved.length?'Resolved: ':'Open: ')+a.concept,'A future commitment was identified and later records were searched for completion evidence.',resolved.length?('Source: '+s['Record Text']+' | Later completion: '+resolved[0]['Record Text']):s['Record Text'],resolved.length?'Resolved':'Open',false);
+ });
+ // ConnectionLens: generic repeated terms across health records
+ const byPerson={};
+ rs.filter(r=>/health/i.test(r['Record Type'])||/\b(eyes|itch|wheeze|headache|pain|vomit|sleep)\b/i.test(r['Record Text'])).forEach(r=>{
+   (byPerson[r['Young Person']]??=[]).push(r);
+ });
+ Object.entries(byPerson).forEach(([p,arr])=>{
+   const groups=[
+     ['eye irritation',r=>/\b(eye|eyes|itch|itchy|watery|red)\b/i.test(r['Record Text'])],
+     ['headache',r=>/\bheadache|head pain\b/i.test(r['Record Text'])],
+     ['respiratory',r=>/\bwheeze|breathing|chest tight\b/i.test(r['Record Text'])],
+     ['sleep',r=>/\bsleep|awake|woke\b/i.test(r['Record Text'])]
+   ];
+   groups.forEach(([name,fn])=>{
+     const hits=arr.filter(fn);
+     if(hits.length>=3) add('ConnectionLens','Repeated theme',hits[0],hits.map(x=>x['Record ID']),'Medium','Repeated '+name+' chronology detected','Several records appear to describe the same health or wellbeing theme over time. CareLens surfaces the chronology for human review.',hits.map(x=>x['Record ID']+': '+x['Record Text']).join(' | '),'Pattern identified');
+   });
+ });
+ renderAll();
+}
+function goto(page){const el=$(page);if(!el)return;document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.page===page));el.classList.add('active');$('pageTitle').textContent={dashboard:'Management Dashboard',upload:'Analyse Records',findings:'Findings Inbox',actions:'ActionLens',evidence:'EvidenceLens',oversight:'Oversight',tour:'Demo Guide'}[page]||'CareLens';currentPage=page}
+document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>goto(b.dataset.page));document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>goto(b.dataset.jump));
+function renderAll(){
+ $('mRecords').textContent=records.length;
+ const review=findings.filter(f=>!f.positive && !['Resolved','Pattern identified'].includes(f.status));
+ const openActions=findings.filter(f=>f.module==='ActionLens'&&f.status==='Open');
+ const allActions=findings.filter(f=>f.module==='ActionLens');
+ const resolvedActions=findings.filter(f=>f.module==='ActionLens'&&f.status==='Resolved');
+ const positive=findings.filter(f=>f.positive);
+ const voice=findings.filter(f=>f.module==='VoiceLens');
+ const edi=findings.filter(f=>f.module==='EvidenceLens' && /faith|cultural|accessibility|individualised|identity|inclusion/i.test(f.title+' '+f.why));
+ const quality=findings.filter(f=>f.module==='RecordLens');
+ const voiceRecordIds=new Set(voice.flatMap(f=>f.ids));
+ const voicePct=records.length?Math.round((voiceRecordIds.size/records.length)*100):0;
+ const closurePct=allActions.length?Math.round((resolvedActions.length/allActions.length)*100):0;
+ $('mReview').textContent=review.length;$('mOpen').textContent=openActions.length;$('mPositive').textContent=positive.length;
+ if($('mVoice'))$('mVoice').textContent=voicePct+'%';
+ if($('mClosure'))$('mClosure').textContent=closurePct+'%';
+ if($('mEDI'))$('mEDI').textContent=edi.length;
+ if($('mQuality'))$('mQuality').textContent=quality.length;
+ if($('oReviews'))$('oReviews').textContent=review.length;
+ if($('oOpen'))$('oOpen').textContent=openActions.length;
+ if($('oPositive'))$('oPositive').textContent=positive.length;
+ if($('cedarAttention'))$('cedarAttention').innerHTML=review.length?'<span class="pill">'+review.length+' review</span>':'<span class="pill">Stable</span>';
+ if($('cedarOpen'))$('cedarOpen').textContent=openActions.length;
+ if($('cedarPositive'))$('cedarPositive').textContent=positive.length;
+ if($('oVoice'))$('oVoice').textContent=voicePct+'%';
+ if($('oClosure'))$('oClosure').textContent=closurePct+'%';
+ if($('oEDI'))$('oEDI').textContent=edi.length;
+ if($('oQuality'))$('oQuality').textContent=quality.length;
+ $('priority').innerHTML=review.slice(0,6).map(rowHtml).join('')||'<div class="empty">No review findings yet.</div>';
+ const counts={};findings.forEach(f=>counts[f.module]=(counts[f.module]||0)+1);
+ $('moduleSummary').innerHTML=Object.entries(counts).map(([k,v])=>'<div style="margin:7px 0"><b>'+esc(k)+'</b>: '+v+' finding'+(v===1?'':'s')+'</div>').join('')||'No analysis yet.';
+ renderFindings();renderActions();renderEvidence();
+}
+function rowHtml(f){
+  const cls=f.severity==='High'?'high':f.severity==='Medium'?'medium':'';
+  return `<div class="finding" data-finding-id="${esc(f.id)}"><div class="dot ${cls}"></div><div><div class="ft">${esc(f.title)}</div><div class="fm">${esc(f.person)} · ${esc(f.module)} · ${esc(f.ids.join(', '))}</div></div><span class="pill">${esc(f.severity)}</span></div>`;
+}
+function renderFindings(){
+ const mod=$('moduleFilter').value,q=$('search').value.toLowerCase();
+ const fs=findings.filter(f=>(mod==='all'||f.module===mod)&&(!q||JSON.stringify(f).toLowerCase().includes(q)));
+ $('findingsTable').innerHTML=fs.length?'<table class="table"><thead><tr><th>Finding</th><th>Young person</th><th>Module</th><th>Status</th></tr></thead><tbody>'+fs.map(f=>`<tr data-finding-id="${esc(f.id)}" style="cursor:pointer"><td><b>${esc(f.title)}</b><div class="fm">${esc(f.ids.join(', '))}</div></td><td>${esc(f.person)}</td><td><span class="module">${esc(f.module)}</span></td><td>${esc(f.status)}</td></tr>`).join('')+'</tbody></table>':'<div class="empty">No matching findings.</div>';
+ bindFindingClicks();
+}
+function renderActions(){
+ const fs=findings.filter(f=>f.module==='ActionLens');
+ $('actionsTable').innerHTML=fs.length?'<table class="table"><thead><tr><th>Action</th><th>Young person</th><th>Records</th><th>Status</th></tr></thead><tbody>'+fs.map(f=>`<tr data-finding-id="${esc(f.id)}" style="cursor:pointer"><td><b>${esc(f.title.replace(/^Open: |^Resolved: /,''))}</b></td><td>${esc(f.person)}</td><td>${esc(f.ids.join(', '))}</td><td class="${f.status==='Resolved'?'status-resolved':'status-open'}">${esc(f.status)}</td></tr>`).join('')+'</tbody></table>':'<div class="empty">No actions detected.</div>';
+ bindFindingClicks();
+}
+function renderEvidence(){
+ const fs=findings.filter(f=>f.module==='EvidenceLens'||f.module==='VoiceLens');
+ $('evidenceList').innerHTML=fs.map(rowHtml).join('')||'<div class="empty">No positive evidence detected.</div>';
+ bindFindingClicks();
+}
+function bindFindingClicks(){
+ document.querySelectorAll('[data-finding-id]').forEach(el=>{
+   el.onclick=()=>openFinding(el.getAttribute('data-finding-id'));
+ });
+}
+$('moduleFilter').onchange=renderFindings;$('search').oninput=renderFindings;
+function openFinding(id){const f=findings.find(x=>x.id===id);if(!f)return;$('dModule').textContent=f.module;$('dTitle').textContent=f.title;$('dMeta').textContent=f.person+' · '+f.severity+' · '+f.status;$('dWhy').textContent=f.why;$('dEvidence').textContent=f.evidence;$('dRecords').innerHTML=f.ids.map(id=>{const r=records.find(x=>x['Record ID']===id);return r?'<div class="panel" style="box-shadow:none;margin:8px 0;padding:12px"><b>'+esc(id)+' · '+esc(r['Record Type'])+'</b><div class="fm">'+esc(r.Date)+' · '+esc(r.Author)+'</div><div class="note" style="margin-top:6px">'+esc(r['Record Text'])+'</div></div>':''}).join('');$('dDecision').textContent='';$('drawer').classList.add('open');$('overlay').classList.add('open')}
+window.openFinding=openFinding;window.decision=d=>$('dDecision').textContent='Prototype manager decision: '+d+'. Source records were not altered.';
+function close(){$('drawer').classList.remove('open');$('overlay').classList.remove('open')}$('close').onclick=close;$('overlay').onclick=close;
+$('fileInput').onchange=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const rs=csvParse(reader.result);if(!rs.length||!('Record Text' in rs[0]))throw Error('Required columns not found');analyse(rs);$('datasetName').textContent=file.name+' · '+rs.length+' records';$('uploadStatus').textContent='Analysis complete: '+findings.length+' findings generated locally in your browser.';goto('dashboard')}catch(err){$('uploadStatus').textContent='Could not analyse file: '+err.message}};reader.readAsText(file)};
+$('loadSample').onclick=()=>{const rs=csvParse(SAMPLE_CSV);analyse(rs);$('datasetName').textContent='Built-in synthetic dataset · '+rs.length+' records';$('uploadStatus').textContent='Analysis complete: '+findings.length+' findings generated locally in your browser.';goto('dashboard')};
+renderAll();
+</script>
+</body></html>
